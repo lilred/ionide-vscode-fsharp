@@ -2,6 +2,7 @@
   "name": "Ionide-fsharp",
   "version": "2.9.4",
   "publisher": "Ionide",
+  "enableProposedApi": true,
   "contributors": [
     {
       "name": "Krzysztof Cieślak",
@@ -30,7 +31,7 @@
     "url": "https://github.com/ionide/ionide-vscode-fsharp.git"
   },
   "engines": {
-    "vscode": "^0.10.0"
+    "vscode": "^1.7.0"
   },
   "main": "./fsharp",
   "contributes": {
@@ -50,6 +51,11 @@
         "configuration": "./language-configuration.json"
       }
     ],
+    "explorer": {
+      "treeExplorerNodeProviderId": "ionideSolution",
+      "treeLabel": "Workspace",
+      "icon": "images/explorer.svg"
+    },
     "grammars": [
       {
         "language": "fsharp",

@@ -15,24 +15,27 @@ module SolutionExplorer =
 
     type Model =
         | Workspace of Projects : Model list
-        | Project of name: string * Nodes: Model list
+        | ReferenceList of References: Model list
+        | FileList of Files: Model list
+        | Project of name: string * ReferenceList: Model * FileList: Model
         | File of name: string
         | Reference of name: string
 
     let private getModel() =
         let projects = Project.getLoadedProjects ()
         projects |> Map.toList |> List.map (fun (_,proj) ->
-            let files = proj.Files |> List.map File
-            let refs = proj.References |> List.map Reference
-            let nodes = [yield! refs; yield! files]
+            let files = proj.Files |> List.map (path.basename) |> List.map File |> FileList
+            let refs = proj.References |> List.map (path.basename) |> List.map Reference |> ReferenceList
             let name = proj.Project |> path.basename
-            Project(name,nodes)
+            Project(name,files, refs)
         ) |> Workspace
 
     let private getChildren node =
         match node with
             | Workspace projects -> projects
-            | Project (name, nodes) -> nodes
+            | Project (name, files, refs) -> [yield refs; yield files]
+            | ReferenceList refs -> refs
+            | FileList files -> files
             | File _ -> []
             | Reference _ -> []
         |> List.toArray
@@ -40,14 +43,18 @@ module SolutionExplorer =
     let private getLabel node =
         match node with
         | Workspace _ -> "Workspace"
-        | Project (name,_) -> name
+        | Project (name,_,_) -> name
+        | ReferenceList _ -> "References"
+        | FileList _ -> "Files"
         | File name -> name
         | Reference name -> name
 
     let private hasChildren node =
         match node with
         | Workspace _ -> true
-        | Project (name,_) -> true
+        | Project (name,_,_) -> true
+        | ReferenceList refs -> refs |> List.isEmpty |> not
+        | FileList files -> files |> List.isEmpty |> not
         | File name -> false
         | Reference name -> false
 
@@ -76,6 +83,12 @@ module SolutionExplorer =
 
 
         }
+
+    let activate () =
+        window.registerTreeExplorerNodeProvider("ionideSolution", createProvider())
+        |> ignore
+
+        ()
 
 
 

@@ -20,6 +20,7 @@ let activate(disposables: Disposable[]) =
     |> Promise.onSuccess (fun _ ->
         Errors.activate disposables
         |> Promise.bind(fun _ -> Project.activate ())
+        |> Promise.onSuccess(fun _ -> SolutionExplorer.activate ())
         |> ignore
 
         Tooltip.activate df' disposables
